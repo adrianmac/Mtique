@@ -13,6 +13,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
     return NextResponse.json(updatedItem);
   } catch (error) {
+    console.error("Error updating item:", error);
     return NextResponse.json({ error: 'Failed to update item' }, { status: 500 });
   }
 }
@@ -25,6 +26,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     });
     return NextResponse.json({ message: 'Item deleted' });
   } catch (error) {
+    console.error("Error deleting item:", error);
     return NextResponse.json({ error: 'Failed to delete item' }, { status: 500 });
   }
 }

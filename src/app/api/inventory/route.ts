@@ -8,6 +8,7 @@ export async function GET() {
     const items = await prisma.inventoryItem.findMany();
     return NextResponse.json(items);
   } catch (error) {
+    console.error("Error fetching inventory:", error);
     return NextResponse.json({ error: 'Failed to fetch inventory' }, { status: 500 });
   }
 }
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
+    console.error("Error creating item:", error);
     return NextResponse.json({ error: 'Failed to create item' }, { status: 500 });
   }
 }
