@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: event-planner-pro
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: file:./dev.db
