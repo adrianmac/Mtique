@@ -20,3 +20,48 @@ model InventoryItem {
   price          Float
   imageUrl       String?
 }
+
+model Customer {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String?
+  status    String    @default("Active") // Active, Inactive, Prospect
+  totalSpent Float    @default(0.0)
+  createdAt DateTime  @default(now())
+  invoices  Invoice[]
+  events    Event[]
+}
+
+model Invoice {
+  id          Int      @id @default(autoincrement())
+  invoiceNumber String @unique
+  customerId  Int
+  customer    Customer @relation(fields: [customerId], references: [id])
+  serviceType String
+  issueDate   DateTime @default(now())
+  amount      Float
+  status      String   // Paid, Overdue, Partial, Draft
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  name        String
+  customerId  Int
+  customer    Customer @relation(fields: [customerId], references: [id])
+  type        String   // Wedding, Gala, Party, etc.
+  date        DateTime
+  venue       String?
+  status      String   // Planning, Finalized, Completed, Concept
+  progress    Int      @default(0)
+}
+
+model Vendor {
+  id       Int    @id @default(autoincrement())
+  name     String
+  category String // Catering, Photography, Florist, etc.
+  status   String // Booked, Pending, Inquiry, Paid
+  rating   Float  @default(0.0)
+  phone    String?
+  email    String?
+}

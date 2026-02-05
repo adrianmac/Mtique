@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
+  // Inventory Seeding
   const inventory = [
     {
       name: 'Lace Wedding Dress',
@@ -57,6 +58,78 @@ async function main() {
       update: {},
       create: item,
     });
+  }
+
+  // Customer Seeding
+  const customers = [
+    { name: 'Sarah Jenkins', email: 'sarah.j@example.com', phone: '(555) 123-4567', totalSpent: 4250.00 },
+    { name: 'Michael Ross', email: 'm.ross@logistics.com', phone: '(555) 987-6543', totalSpent: 1120.00 },
+    { name: 'Elena Rodriguez', email: 'elena@fashion.co', phone: '(555) 444-2211', totalSpent: 850.00 },
+    { name: 'David Miller', email: 'dmiller@corp.com', phone: '(555) 222-3333', totalSpent: 6000.00 },
+    { name: 'Claire Thompson', email: 'claire.t@example.com', phone: '(555) 888-9999', totalSpent: 12000.00 }
+  ];
+
+  for (const customer of customers) {
+    await prisma.customer.upsert({
+      where: { email: customer.email },
+      update: {},
+      create: customer,
+    });
+  }
+
+  // Helper to find customer by email
+  const getCust = async (email) => await prisma.customer.findUnique({ where: { email } });
+
+  // Invoices Seeding
+  const sarah = await getCust('sarah.j@example.com');
+  const michael = await getCust('m.ross@logistics.com');
+  const elena = await getCust('elena@fashion.co');
+  const david = await getCust('dmiller@corp.com');
+
+  const invoices = [
+    { invoiceNumber: 'INV-2023-001', customerId: sarah.id, serviceType: 'Wedding Planning', amount: 4250.00, status: 'Paid', issueDate: new Date('2023-10-24') },
+    { invoiceNumber: 'INV-2023-042', customerId: michael.id, serviceType: 'Rentals', amount: 1120.00, status: 'Overdue', issueDate: new Date('2023-11-02') },
+    { invoiceNumber: 'INV-2023-045', customerId: elena.id, serviceType: 'Seamstress', amount: 850.00, status: 'Partial', issueDate: new Date('2023-11-05') },
+    { invoiceNumber: 'INV-2023-051', customerId: david.id, serviceType: 'Wedding Planning', amount: 6000.00, status: 'Draft', issueDate: new Date('2023-11-10') }
+  ];
+
+  for (const inv of invoices) {
+    await prisma.invoice.upsert({
+      where: { invoiceNumber: inv.invoiceNumber },
+      update: {},
+      create: inv,
+    });
+  }
+
+  // Events Seeding
+  const claire = await getCust('claire.t@example.com');
+  const events = [
+    { name: 'Thompson Wedding', customerId: claire.id, type: 'Wedding', date: new Date('2023-10-24'), venue: 'Rosewood Estate', status: 'Planning', progress: 70 },
+    { name: 'Global Tech Gala', customerId: michael.id, type: 'Gala', date: new Date('2023-11-02'), venue: 'Skyline Ballroom', status: 'Finalized', progress: 94 },
+    { name: 'Miller 50th Birthday', customerId: david.id, type: 'Party', date: new Date('2023-12-15'), venue: 'Private Residence', status: 'Concept', progress: 20 }
+  ];
+
+  for (const evt of events) {
+    // Basic check to avoid duplicates for seeding simplicity
+    const existing = await prisma.event.findFirst({ where: { name: evt.name } });
+    if (!existing) {
+      await prisma.event.create({ data: evt });
+    }
+  }
+
+  // Vendors Seeding
+  const vendors = [
+    { name: 'Savory Soirees Catering', category: 'Catering', status: 'Paid', rating: 4.9, phone: '(555) 123-4567', email: 'hello@savorysoirees.com' },
+    { name: 'Golden Hour Frames', category: 'Photography', status: 'Booked', rating: 4.8, phone: '(555) 987-6543', email: 'contact@goldenhour.co' },
+    { name: 'Elite Alterations', category: 'Seamstress', status: 'Shortlisted', rating: 5.0, phone: '(555) 000-1111', email: 'tailor@elitealt.com' }
+  ];
+
+  for (const v of vendors) {
+    // Simple check
+    const existing = await prisma.vendor.findFirst({ where: { name: v.name } });
+    if (!existing) {
+      await prisma.vendor.create({ data: v });
+    }
   }
 }
 
