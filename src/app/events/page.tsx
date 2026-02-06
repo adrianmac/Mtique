@@ -1,4 +1,46 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+
+type Event = {
+  id: number;
+  name: string;
+  customer: { name: string };
+  type: string;
+  date: string;
+  status: string;
+};
+
 export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const res = await fetch('/api/events');
+        if (res.ok) {
+          const data = await res.json();
+          setEvents(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch events", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchEvents();
+  }, []);
+
+  const getStatusColor = (status: string) => {
+      if (status === 'Planning') return 'text-blue-500';
+      if (status === 'Finalized') return 'text-yellow-500';
+      if (status === 'Completed') return 'text-green-500';
+      return 'text-gray-500';
+  }
+
+  if (loading) return <div className="p-8">Loading events...</div>;
+
   return (
     <div className="flex-1 overflow-y-auto p-8">
       <div className="flex justify-between items-center mb-6">
@@ -21,20 +63,15 @@ export default function EventsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e5e7eb] dark:divide-[#2d3a41]">
-            <tr>
-              <td className="px-6 py-4 font-bold">Thompson Wedding</td>
-              <td className="px-6 py-4">Claire & David T.</td>
-              <td className="px-6 py-4"><span className="bg-pink-100 text-pink-600 px-2 py-1 rounded-full text-xs font-bold uppercase">Wedding</span></td>
-              <td className="px-6 py-4">Oct 24, 2023</td>
-              <td className="px-6 py-4"><span className="text-blue-500 font-bold text-sm">Planning</span></td>
-            </tr>
-            <tr>
-              <td className="px-6 py-4 font-bold">Global Tech Gala</td>
-              <td className="px-6 py-4">Horizon Systems</td>
-              <td className="px-6 py-4"><span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-bold uppercase">Gala</span></td>
-              <td className="px-6 py-4">Nov 02, 2023</td>
-              <td className="px-6 py-4"><span className="text-yellow-500 font-bold text-sm">Finalized</span></td>
-            </tr>
+            {events.map((evt) => (
+              <tr key={evt.id}>
+                <td className="px-6 py-4 font-bold">{evt.name}</td>
+                <td className="px-6 py-4">{evt.customer.name}</td>
+                <td className="px-6 py-4"><span className="bg-pink-100 text-pink-600 px-2 py-1 rounded-full text-xs font-bold uppercase">{evt.type}</span></td>
+                <td className="px-6 py-4">{new Date(evt.date).toLocaleDateString()}</td>
+                <td className="px-6 py-4"><span className={`${getStatusColor(evt.status)} font-bold text-sm`}>{evt.status}</span></td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
